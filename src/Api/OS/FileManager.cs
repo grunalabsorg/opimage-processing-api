@@ -1,20 +1,21 @@
 ﻿using System.IO.Compression;
 
 namespace Api.OS
-{
+{    
     public static class FileManager
     {
-        public static void DeleteImagesFolders()
+        public static string GetDrive()
         {
-            var imagesFolder = Path.Join(Directory.GetCurrentDirectory(), "/images");
-
-            if (!Directory.Exists(imagesFolder))
-                return;
-
-            DeleteDirectory(imagesFolder);
+            FileInfo fileInfo = new FileInfo("Controllers/AnalysisController.cs");
+            return Path.GetPathRoot(fileInfo.FullName)!.Replace("\\", "/");
+        }
+        
+        public static void ExtractToDirectory(ZipArchive zipArchive, string destinationDirName)
+        {
+            zipArchive.ExtractToDirectory(destinationDirName, true);
         }
 
-        private static void DeleteDirectory(string target_dir)
+        public static void DeleteDirectory(string target_dir)
         {
             string[] files = Directory.GetFiles(target_dir);
             string[] dirs = Directory.GetDirectories(target_dir);

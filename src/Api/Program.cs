@@ -1,8 +1,5 @@
 using Api.Common;
 using Api.Middlewares;
-using Api.OS;
-
-FileManager.DeleteImagesFolders();
 
 var builder = WebApplication.CreateBuilder(args);
 
