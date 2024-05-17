@@ -28,7 +28,7 @@ namespace Api.Middlewares
         }
 
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
-        {
+        {        
             HttpStatusCode code = HttpStatusCode.InternalServerError;
 
             var result = JsonSerializer.Serialize(new

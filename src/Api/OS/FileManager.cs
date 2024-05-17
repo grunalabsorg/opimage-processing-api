@@ -33,5 +33,16 @@ namespace Api.OS
 
             Directory.Delete(target_dir, false);
         }
+
+        public static void CreateZipFile(string[] files, string zipFilePath)
+        {            
+            using (var zip = ZipFile.Open(zipFilePath, ZipArchiveMode.Create))
+            {                
+                foreach (var file in files)
+                {
+                    zip.CreateEntryFromFile(file, Path.GetFileName(file));
+                }
+            }
+        }
     }
 }
