@@ -13,6 +13,13 @@ COPY . .
 WORKDIR "/src/src/Api"
 RUN dotnet build "Api.csproj" -c Release -o /app/build
 
+# COPY libProjetoContraste to app folder
+COPY ["src/Api/Libs", "/app"]
+
+# vtk libs
+RUN mkdir -p /usr/lib/ && \
+    cp /usr/lib/libvtk*.so* /usr/lib/
+
 FROM build AS publish
 RUN dotnet publish "Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 

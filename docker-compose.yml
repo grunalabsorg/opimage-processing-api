@@ -1,0 +1,21 @@
+version: "3"
+
+services: 
+  opimage-api:
+    build: ./src/
+    volumes:    
+      # necessário ter libs do vtk em "usr/lib"
+      - vtk_libs:/usr/lib/
+
+  opimage-proxy:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - opimage-api
+
+volumes:
+  vtk_libs:
+    driver: local
