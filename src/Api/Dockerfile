@@ -18,6 +18,10 @@ RUN dotnet publish "Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
+
+COPY src/Api/Libs/vtkLibs/libvtk*.so* /usr/lib/
+COPY src/Api/Libs/libProjetoContraste.so /app
+
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Api.dll"]
 

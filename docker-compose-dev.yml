@@ -2,10 +2,10 @@ version: "3"
 
 services: 
   opimage-api:
-    build: ./src/
-    volumes:    
-      # necessário ter libs do vtk em "usr/lib"
-      - vtk_libs:/usr/lib/
+    build: ./src/Api
+    dockerfile: Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
 
   opimage-proxy:
     image: nginx:alpine
@@ -16,6 +16,4 @@ services:
     depends_on:
       - opimage-api
 
-volumes:
-  vtk_libs:
-    driver: local
+# docker-compose -f docker-compose-dev.yml up -d
