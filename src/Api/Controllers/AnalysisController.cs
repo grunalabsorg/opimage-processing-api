@@ -29,9 +29,9 @@ namespace Api.Controllers
         [HttpPost("test")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> Post() {
-            string path1 = "/home/aroldo/op_test_images/Unknown Patient/MAMAS ROTINA";
-            analise(path1);
+        public async Task<ActionResult> Post() 
+        {
+            Console.WriteLine("Received test request");
             return Ok();
         }
 

@@ -1,28 +1,18 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+FROM mcr.microsoft.com/dotnet/sdk:6.0-jammy AS build
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-WORKDIR /src
-
 COPY ["Api.csproj", "."]
-RUN dotnet restore "Api.csproj"
-
+RUN dotnet restore
 COPY . .
-WORKDIR "/src"
-RUN dotnet build "Api.csproj" -c Release -o /app/build
+RUN dotnet publish -c Release -o /app/publish
 
-FROM build AS publish
-RUN dotnet publish "Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-jammy AS runtime
+RUN apt-get update && apt-get install -y curl
 WORKDIR /app
-
-COPY src/Api/Libs/vtkLibs/libvtk*.so* /usr/lib/
-COPY src/Api/Libs/libProjetoContraste.so /app
-
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Api.dll"]
-
-# docker build .
+COPY ["Libs/vtkLibs/libvtk*.so*", "/app"]
+COPY ["Libs/libProjetoContraste.so", "/app"]
+USER root
+RUN ln -sf /app/libvtk*.so* /usr/lib
+EXPOSE 5000
+ENV ASPNETCORE_URLS=http://+:5000
+COPY --from=build app/publish .
+ENTRYPOINT ["dotnet","Api.dll"]
