@@ -75,7 +75,7 @@
       "EnableIndex": true,
       "EnableStorage": false,
       "Port": 5432,
-      "Host": "postgres",
+      "Host": "orthanc-db",
       "Database": "orthanc",
       "Username": "orthanc",
       "Password": "orthanc",
