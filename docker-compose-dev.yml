@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./server/persistence/pg_db:/var/lib/postgresql/data
+      - ./orthanc-server/persistence/pg_db:/var/lib/postgresql/data
     networks:
       - opimage-network
     restart: unless-stopped
@@ -44,6 +44,7 @@ services:
     restart: unless-stopped 
 
   opimage-processing-api:
+    user: root
     build: 
       context: ./src/Api
       dockerfile: Dockerfile
