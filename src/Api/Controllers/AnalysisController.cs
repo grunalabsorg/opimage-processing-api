@@ -32,7 +32,19 @@ namespace Api.Controllers
         public async Task<ActionResult> Post() 
         {
             Console.WriteLine("Received test request");
-            return Ok();
+            var orthanc_server_url = "http://host.docker.internal:8000"; // local orthanc       
+            var orthancUsername = "test";
+            var orthancPassword = "test";
+            var orthancAuthString = $"{orthancUsername}:{orthancPassword}";
+            var orthancAuthBase64String = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(orthancAuthString));
+
+            using(var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", orthancAuthBase64String);
+                var response = await client.GetAsync(orthanc_server_url + "/series");
+                
+                return Ok(response.Content);                
+            }            
         }
 
         /// <summary>
@@ -54,7 +66,8 @@ namespace Api.Controllers
             Console.WriteLine("Series " + seriesIds);
 
             // Temp vars
-            var orthanc_server_url = "http://localhost:8000"; // local orthanc            
+            var orthanc_server_url = "http://host.docker.internal:8000"; // local orthanc            
+            //var orthanc_server_url = "http://localhost:8000"; // local orthanc            
             //var orthanc_server_url = "https://api.comunicaresolutions.com/orthanc/"; // remote orthanc
             
             var orthancUsername = "test";
@@ -102,10 +115,18 @@ namespace Api.Controllers
 
                 Console.WriteLine("\nValidated series");
             }
-
+    
             // Download series
             //
-            var imagesPath = "/analysis/images";            
+            Console.WriteLine("\nDonwload series");
+
+            var imagesPath = "/analysis/images";
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                imagesPath = "C:/analysis/images";
+            }           
+
             var studyFolder = Path.Join(imagesPath, $"/{requestid}_{referenceParentStudyId}");
             Directory.CreateDirectory(studyFolder);
 
@@ -126,6 +147,7 @@ namespace Api.Controllers
                         return StatusCode((int)response.StatusCode);
                     
                     var seriesFilename = Path.Join(studyFolder, $"/{seriesId}.zip");
+                    Console.WriteLine(seriesFilename);
                     
                     using (var responseFileStream = await response.Content.ReadAsStreamAsync())
                     {
@@ -136,7 +158,8 @@ namespace Api.Controllers
                     }     
 
                     // Extract series
-                    //cannot read
+                    //
+                    Console.WriteLine("\nExtract series");
                     var zipFile = ZipFile.OpenRead(seriesFilename);
                     zipFile.ExtractToDirectory(studyFolder);               
                 }    
@@ -167,12 +190,15 @@ namespace Api.Controllers
                 var analiseFolder = Path.GetDirectoryName(Path.GetDirectoryName(fullnameReference));
                 
                 // Copy series to study folder
+                Console.WriteLine("\nStart analysis");
                 analise(analiseFolder);
                 var analiseResultFolder = Path.Join(analiseFolder, "/RESULTADO");
-                var analiseResultZipFileName = analiseFolder + ".zip";
+                var analiseResultZipFileName = analiseResultFolder + ".zip";
                 ZipFile.CreateFromDirectory(analiseResultFolder, analiseResultZipFileName);
             
                 // Post analysis
+                Console.WriteLine("\nUpload analysis");
+                Console.WriteLine("\n zip filename"+analiseResultZipFileName);
                 using (var fileStream = System.IO.File.Open(analiseResultZipFileName, FileMode.Open))
                 {
                     var study_url_upload = orthanc_server_url + "/study/" + referenceParentStudyId + "/archive";
@@ -180,51 +206,15 @@ namespace Api.Controllers
                     using(var sender = new HttpClient())
                     {
                         HttpContent content = new StreamContent(fileStream);
-                        await sender.PostAsync(study_url_upload, content);
+                        var response = await sender.PostAsync(study_url_upload, content);
+                        Console.WriteLine(response);
                     }
                 }
                 
-                Directory.Delete(studyFolder);                                        
+                FileManager.DeleteDirectory(studyFolder);                                        
             }
             
             return Ok();
-        }            
-    
-        private static void CopyFilesAndFolders(string sourcePath, string targetPath)
-        {
-            try
-            {
-                // Get all directories in the source root
-                string[] directories = Directory.GetDirectories(sourcePath);
-
-                foreach (var dir in directories)
-                {
-                    // Get the name of the current directory
-                    string directoryName = new DirectoryInfo(dir).Name;
-
-                    // Define the target directory path in the destination root
-                    string targetDir = Path.Combine(targetPath, directoryName);
-
-                    // Create the target directory if it does not exist
-                    if (!Directory.Exists(targetDir))
-                    {
-                        Directory.CreateDirectory(targetDir);
-                    }
-
-                    // Copy all files from the current source directory to the target directory
-                    foreach (var file in Directory.GetFiles(dir))
-                    {
-                        string targetFilePath = Path.Combine(targetDir, Path.GetFileName(file));
-                        System.IO.File.Copy(file, targetFilePath, overwrite: true);
-                    }
-                }
-
-                Console.WriteLine("All folders copied successfully.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An error occurred: {ex.Message}");
-            }
-        }
+        }                    
     }
 }
