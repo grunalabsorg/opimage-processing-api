@@ -28,7 +28,8 @@ namespace Api.Middlewares
         }
 
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
-        {                    
+        {   
+            Console.WriteLine("---- EXCEPTION ----");
             Console.WriteLine("\n"+exception.Message);
             Console.WriteLine("\n"+exception.Source);
             Console.WriteLine("\n"+exception.StackTrace);
