@@ -1,14 +1,12 @@
 ﻿﻿using Api.Common;
 using Api.Models;
 using Api.OS;
-using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using System.IO.Compression;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Text.Json;
-using System.Collections.Immutable;
 
 namespace Api.Controllers
 {
@@ -32,19 +30,7 @@ namespace Api.Controllers
         public async Task<ActionResult> Post() 
         {
             Console.WriteLine("Received test request");
-            var orthanc_server_url = "http://host.docker.internal:8000"; // local orthanc       
-            var orthancUsername = "test";
-            var orthancPassword = "test";
-            var orthancAuthString = $"{orthancUsername}:{orthancPassword}";
-            var orthancAuthBase64String = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(orthancAuthString));
-
-            using(var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", orthancAuthBase64String);
-                var response = await client.GetAsync(orthanc_server_url + "/series");
-                
-                return Ok(response.Content);                
-            }            
+            return Ok();
         }
 
         /// <summary>
@@ -66,7 +52,7 @@ namespace Api.Controllers
             Console.WriteLine("Series " + seriesIds);
 
             // Temp vars
-            var orthanc_server_url = "http://host.docker.internal:8000"; // local orthanc            
+            var orthanc_server_url = "https://api.op-image.com/orthanc"; // local orthanc            
             //var orthanc_server_url = "http://localhost:8000"; // local orthanc            
             //var orthanc_server_url = "https://api.comunicaresolutions.com/orthanc/"; // remote orthanc
             
@@ -201,10 +187,13 @@ namespace Api.Controllers
                 Console.WriteLine("\n zip filename"+analiseResultZipFileName);
                 using (var fileStream = System.IO.File.Open(analiseResultZipFileName, FileMode.Open))
                 {
-                    var study_url_upload = orthanc_server_url + "/study/" + referenceParentStudyId + "/archive";
+                    var study_url_upload = orthanc_server_url + "/instances";
+                    Console.WriteLine("POST "+study_url_upload);
 
                     using(var sender = new HttpClient())
                     {
+                        sender.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", orthancAuthBase64String);
+
                         HttpContent content = new StreamContent(fileStream);
                         var response = await sender.PostAsync(study_url_upload, content);
                         Console.WriteLine(response);

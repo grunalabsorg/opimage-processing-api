@@ -1,47 +1,47 @@
 version: "3.8"
 
 services: 
-  orthanc-db:
-    image: postgres:12
-    container_name: orthanc-db
-    environment:
-      POSTGRES_DB: orthanc
-      POSTGRES_USER: orthanc
-      POSTGRES_PASSWORD: orthanc
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./orthanc-server/persistence/pg_db:/var/lib/postgresql/data
-    networks:
-      - opimage-network
-    restart: unless-stopped
-
-  orthanc-server:
-    image: orthancteam/orthanc
-    container_name: orthanc-server
-    depends_on:
-      - orthanc-db
-    volumes:  
-      - ./orthanc-server/config/orthanc.json:/etc/orthanc/orthanc.json        
-    ports:
-      - "8042:8042"
-      - "4242:4242"
-    networks:
-      - opimage-network      
-    restart: unless-stopped
-
-  orthanc-proxy:
-    image: nginx:latest
-    container_name: orthanc-proxy
-    depends_on:
-      - orthanc-server
-    volumes:
-      - ./orthanc-server/config/nginx.conf:/etc/nginx/nginx.conf
-    ports:
-      - "8000:8000"
-    networks:
-      - opimage-network
-    restart: unless-stopped 
+  #orthanc-db:
+  #  image: postgres:12
+  #  container_name: orthanc-db
+  #  environment:
+  #    POSTGRES_DB: orthanc
+  #    POSTGRES_USER: orthanc
+  #    POSTGRES_PASSWORD: orthanc
+  #  ports:
+  #    - "5432:5432"
+  #  volumes:
+  #    - ./orthanc-server/persistence/pg_db:/var/lib/postgresql/data
+  #  networks:
+  #    - opimage-network
+  #  restart: unless-stopped
+  #
+  #orthanc-server:
+  #  image: orthancteam/orthanc
+  #  container_name: orthanc-server
+  #  depends_on:
+  #    - orthanc-db
+  #  volumes:  
+  #    - ./orthanc-server/config/orthanc.json:/etc/orthanc/orthanc.json        
+  #  ports:
+  #    - "8042:8042"
+  #    - "4242:4242"
+  #  networks:
+  #    - opimage-network      
+  #  restart: unless-stopped
+  #
+  #orthanc-proxy:
+  #  image: nginx:latest
+  #  container_name: orthanc-proxy
+  #  depends_on:
+  #    - orthanc-server
+  #  volumes:
+  #    - ./orthanc-server/config/nginx.conf:/etc/nginx/nginx.conf
+  #  ports:
+  #    - "8000:8000"
+  #  networks:
+  #    - opimage-network
+  #  restart: unless-stopped 
 
   opimage-processing-api:
     user: root
