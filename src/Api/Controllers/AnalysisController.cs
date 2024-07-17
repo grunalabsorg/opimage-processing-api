@@ -1,6 +1,7 @@
 ﻿﻿using Api.Common;
 using Api.Models;
 using Api.OS;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using System.IO.Compression;
 using System.Net;
@@ -173,15 +174,49 @@ namespace Api.Controllers
                     return StatusCode((int)HttpStatusCode.UnprocessableEntity);
                 
                 // TODO! Refactor to exclude patient and study folder
-                var analiseFolder = Path.GetDirectoryName(Path.GetDirectoryName(fullnameReference));
+                var analiseDir = Path.GetDirectoryName(Path.GetDirectoryName(fullnameReference));
                 
                 // Copy series to study folder
                 Console.WriteLine("\nStart analysis");
-                analise(analiseFolder);
-                var analiseResultFolder = Path.Join(analiseFolder, "/RESULTADO");
-                var analiseResultZipFileName = analiseResultFolder + ".zip";
-                ZipFile.CreateFromDirectory(analiseResultFolder, analiseResultZipFileName);
-            
+                analise(analiseDir);
+                var analiseResultFolder = Path.Join(analiseDir, "/RESULTADO");
+
+                // Convert mha to dcm
+                var referenceDcmFilename = Directory.GetFiles(Directory.GetDirectories(analiseDir).First()).First();
+
+                Console.WriteLine("\nanaliseResultFolder - "+ analiseResultFolder);
+                Console.WriteLine("referenceDcm - "+ referenceDcmFilename);
+                                
+                foreach(var filename in Directory.GetFiles(analiseResultFolder))
+                {
+                    if(!filename.EndsWith(".mha"))
+                        continue;
+                    
+                    Console.WriteLine("\nConverting - "+ filename);
+
+                    var mhaFileStream = System.IO.File.Open(filename, FileMode.Open);
+                    var refDcmFileStream = System.IO.File.Open(referenceDcmFilename, FileMode.Open);
+                    
+                    var mha_url_upload = "https://upload.op-image.com/upload/convert";
+                    Console.WriteLine("\nPOST "+mha_url_upload);
+                    
+                    using(var sender = new HttpClient())
+                    {                    
+                        using (var content = new MultipartFormDataContent())
+                        {
+                            content.Add(new StreamContent(mhaFileStream), "mha_file", Path.GetFileName(filename));
+                            content.Add(new StreamContent(refDcmFileStream), "dicom_reference", Path.GetFileName(referenceDcmFilename));
+
+                            var response = await sender.PostAsync(mha_url_upload, content);
+                            Console.WriteLine(response);
+                        }                        
+                    }                    
+                }                
+                //ImageConverter.MhaToDcm(analiseResultFolder, referenceDcm);
+                //var analiseResultZipFileName = analiseResultFolder + ".zip";
+                //ZipFile.CreateFromDirectory(analiseResultFolder, analiseResultZipFileName);
+                
+                /*
                 // Post analysis
                 Console.WriteLine("\nUpload analysis");
                 Console.WriteLine("\n zip filename"+analiseResultZipFileName);
@@ -199,7 +234,7 @@ namespace Api.Controllers
                         Console.WriteLine(response);
                     }
                 }
-                
+                */
                 FileManager.DeleteDirectory(studyFolder);                                        
             }
             

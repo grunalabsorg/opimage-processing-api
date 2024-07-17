@@ -36,6 +36,24 @@
                 "${workspaceFolder}/OpImageProcessingApi.sln"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "docker-compose: up",
+            "type": "shell",
+            "command": "docker-compose",
+            "args": [
+                "-f",
+                "${workspaceFolder}/docker-compose-dev.yml",
+                "up",
+                "--build",
+                "-d"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Runs docker-compose up to start the containers."
         }
     ]
 }
