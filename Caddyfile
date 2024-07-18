@@ -2,6 +2,9 @@ api0.op-image.com, api0.oncoviewer.com {
     @cors_preflight {
         method OPTIONS
     }
+    request_body {
+		max_size 100MB
+	}
     handle /api/* {
     # handle_path /api/* {
         reverse_proxy http://opimage-processing-api:5000 {
@@ -40,7 +43,7 @@ api0.op-image.com, api0.oncoviewer.com {
             header_up X-Real-IP {remote}
             # As seguintes linhas são desnecessárias e foram removidas
             # header_up X-Forwarded-For {remote}
-            # header_up X-Forwarded-Host {host}
+            header_up X-Forwarded-Host {host}
             # rewrite * {path} {
             #     if {path} starts_with "/orthanc"
             #     to {path} {http.matchers.file.relative}
@@ -57,6 +60,4 @@ api0.op-image.com, api0.oncoviewer.com {
             Cross-Origin-Opener-Policy "same-origin"
         }
     }
-    
-    client_max_body_size 100M
 }
