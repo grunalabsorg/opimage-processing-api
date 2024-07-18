@@ -14,7 +14,7 @@ api0.op-image.com, api0.oncoviewer.com {
             #     if {path} starts_with "/api"
             #     to {path} {http.matchers.file.relative}
             # }
-            rewrite * {http.request.uri.path}
+            # rewrite * {http.request.uri.path}
         }
     }
     handle /orthanc/* {
@@ -45,7 +45,7 @@ api0.op-image.com, api0.oncoviewer.com {
             #     if {path} starts_with "/orthanc"
             #     to {path} {http.matchers.file.relative}
             # }
-            rewrite * {http.request.uri.path}
+            # rewrite * {http.request.uri.path}
         }
         
         header {
