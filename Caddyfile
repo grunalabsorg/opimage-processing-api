@@ -1,4 +1,4 @@
-api.op-image.com, api.oncoviewer.com {
+api0.op-image.com, api0.oncoviewer.com {
     @cors_preflight {
         method OPTIONS
     }
@@ -6,12 +6,14 @@ api.op-image.com, api.oncoviewer.com {
         reverse_proxy http://opimage-processing-api:5000 {
             header_up Host {host}
             header_up X-Real-IP {remote}
-            header_up X-Forwarded-For {remote}
-            header_up X-Forwarded-Proto {scheme}
-            rewrite * {path} {
-                if {path} starts_with "/api"
-                to {path} {http.matchers.file.relative}
-            }
+            # As seguintes linhas são desnecessárias e foram removidas
+            # header_up X-Forwarded-For {remote}
+            # header_up X-Forwarded-Proto {scheme}
+            # rewrite * {path} {
+            #     if {path} starts_with "/api"
+            #     to {path} {http.matchers.file.relative}
+            # }
+            rewrite * {http.request.uri.path}
         }
     }
     handle_path /orthanc/* {
@@ -34,12 +36,14 @@ api.op-image.com, api.oncoviewer.com {
         reverse_proxy http://orthanc:8042 {
             header_up Host {host}
             header_up X-Real-IP {remote}
-            header_up X-Forwarded-For {remote}
-            header_up X-Forwarded-Host {host}
-            rewrite * {path} {
-                if {path} starts_with "/orthanc"
-                to {path} {http.matchers.file.relative}
-            }
+            # As seguintes linhas são desnecessárias e foram removidas
+            # header_up X-Forwarded-For {remote}
+            # header_up X-Forwarded-Host {host}
+            # rewrite * {path} {
+            #     if {path} starts_with "/orthanc"
+            #     to {path} {http.matchers.file.relative}
+            # }
+            rewrite * {http.request.uri.path}
         }
         
         header {
