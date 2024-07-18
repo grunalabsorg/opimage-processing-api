@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  caddy:
+    image: caddy:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - orthanc
+      - opimage-processing-api
+  
+  opimage-processing-api:
+    user: root
+    build: 
+      context: ./src/Api
+      dockerfile: Dockerfile
+    container_name: opimage-processing-api
+    ports:
+      - 5000:5000
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    restart: unless-stopped
+
+  orthanc:
+    image: orthancteam/orthanc
+    container_name: orthanc-server
+    depends_on:
+      - postgres
+    volumes:
+      - ./config/orthanc.json:/etc/orthanc/orthanc.json
+    ports:
+      - "8042:8042"
+      - "4242:4242"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:12
+    container_name: orthanc-db
+    environment:
+      POSTGRES_DB: orthanc
+      POSTGRES_USER: orthanc
+      POSTGRES_PASSWORD: orthanc
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./persistence/pg_db:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:
