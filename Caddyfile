@@ -1,10 +1,13 @@
-localhost {
-	#api0.op-image.com, api0.oncoviewer.com {
+#localhost {
+api0.op-image.com, api0.oncoviewer.com {
 	@cors_preflight {
 		method OPTIONS
 	}
 	request_body {
 		max_size 100MB
+	}
+	handle / {
+		respond "Hello, World!"
 	}
 	handle /analysis/* {
 		# handle_path /api/* {
