@@ -1,63 +1,64 @@
-api0.op-image.com, api0.oncoviewer.com {
-    @cors_preflight {
-        method OPTIONS
-    }
-    request_body {
+localhost {
+	#api0.op-image.com, api0.oncoviewer.com {
+	@cors_preflight {
+		method OPTIONS
+	}
+	request_body {
 		max_size 100MB
 	}
-    handle /api/* {
-    # handle_path /api/* {
-        reverse_proxy http://opimage-processing-api:5000 {
-            header_up Host {host}
-            header_up X-Real-IP {remote}
-            # As seguintes linhas são desnecessárias e foram removidas
-            # header_up X-Forwarded-For {remote}
-            # header_up X-Forwarded-Proto {scheme}
-            # rewrite * {path} {
-            #     if {path} starts_with "/api"
-            #     to {path} {http.matchers.file.relative}
-            # }
-            # rewrite * {http.request.uri.path}
-        }
-    }
-    handle /orthanc/* {
-    # handle_path /orthanc/* {
-        @preflight_options {
-            method OPTIONS
-        }
-        header @preflight_options {
-            Access-Control-Allow-Origin "*"
-            Access-Control-Allow-Credentials "true"
-            Access-Control-Allow-Headers "Authorization,Accept,Origin,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range"
-            Access-Control-Allow-Methods "GET,POST,OPTIONS,PUT,DELETE,PATCH"
-            Access-Control-Max-Age "1728000"
-            Content-Type "text/plain; charset=UTF-8"
-            Content-Length "0"
-            Cross-Origin-Embedder-Policy "require-corp"
-            Cross-Origin-Opener-Policy "same-origin"
-        }
-        respond @preflight_options 204
+	handle /analysis/* {
+		# handle_path /api/* {
+		reverse_proxy opimage-processing-api:5000 {
+			header_up Host {host}
+			header_up X-Real-IP {remote}
+			# As seguintes linhas são desnecessárias e foram removidas
+			# header_up X-Forwarded-For {remote}
+			# header_up X-Forwarded-Proto {scheme}
+			# rewrite * {path} {
+			#     if {path} starts_with "/api"
+			#     to {path} {http.matchers.file.relative}
+			# }
+			# rewrite * {http.request.uri.path}
+		}
+	}
+	handle /orthanc/* {
+		# handle_path /orthanc/* {
+		@preflight_options {
+			method OPTIONS
+		}
+		header @preflight_options {
+			Access-Control-Allow-Origin "*"
+			Access-Control-Allow-Credentials "true"
+			Access-Control-Allow-Headers "Authorization,Accept,Origin,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range"
+			Access-Control-Allow-Methods "GET,POST,OPTIONS,PUT,DELETE,PATCH"
+			Access-Control-Max-Age "1728000"
+			Content-Type "text/plain; charset=UTF-8"
+			Content-Length "0"
+			Cross-Origin-Embedder-Policy "require-corp"
+			Cross-Origin-Opener-Policy "same-origin"
+		}
+		respond @preflight_options 204
 
-        reverse_proxy http://orthanc:8042 {
-            header_up Host {host}
-            header_up X-Real-IP {remote}
-            # As seguintes linhas são desnecessárias e foram removidas
-            # header_up X-Forwarded-For {remote}
-            header_up X-Forwarded-Host {host}
-            # rewrite * {path} {
-            #     if {path} starts_with "/orthanc"
-            #     to {path} {http.matchers.file.relative}
-            # }
-            # rewrite * {http.request.uri.path}
-        }
-        
-        header {
-            Access-Control-Allow-Origin "*"
-            Access-Control-Allow-Credentials "true"
-            Access-Control-Allow-Headers "Authorization,Accept,Origin,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range"
-            Access-Control-Allow-Methods "GET,POST,OPTIONS,PUT,DELETE,PATCH"
-            Cross-Origin-Embedder-Policy "require-corp"
-            Cross-Origin-Opener-Policy "same-origin"
-        }
-    }
+		reverse_proxy orthanc:8042 {
+			header_up Host {host}
+			header_up X-Real-IP {remote}
+			# As seguintes linhas são desnecessárias e foram removidas
+			# header_up X-Forwarded-For {remote}
+			# header_up X-Forwarded-Host {host}
+			# rewrite * {path} {
+			#     if {path} starts_with "/orthanc"
+			#     to {path} {http.matchers.file.relative}
+			# }
+			# rewrite * {http.request.uri.path}
+		}
+
+		header {
+			Access-Control-Allow-Origin "*"
+			Access-Control-Allow-Credentials "true"
+			Access-Control-Allow-Headers "Authorization,Accept,Origin,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range"
+			Access-Control-Allow-Methods "GET,POST,OPTIONS,PUT,DELETE,PATCH"
+			Cross-Origin-Embedder-Policy "require-corp"
+			Cross-Origin-Opener-Policy "same-origin"
+		}
+	}
 }
