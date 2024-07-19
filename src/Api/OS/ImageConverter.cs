@@ -16,7 +16,8 @@ namespace Api.OS
                 CreateNoWindow = true,
             };
 
-            Console.WriteLine("\narguments - "+start.Arguments);
+            Console.WriteLine("\nSend files to dicom conversion - "+start.Arguments);
+            Console.WriteLine("arguments - "+start.Arguments);
             
             using (var process = Process.Start(start))
             {

@@ -61,8 +61,7 @@ namespace Api.Controllers
             var orthancPassword = "test";
             var orthancAuthString = $"{orthancUsername}:{orthancPassword}";
             var orthancAuthBase64String = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(orthancAuthString));
-
-            //var referenceSeriesId = seriesIds[0];
+  
             int? referenceSeriesInstancesCount = null;
             string? referenceParentStudyId = null;
 
@@ -103,8 +102,7 @@ namespace Api.Controllers
                 Console.WriteLine("\nValidated series");
             }
     
-            // Download series
-            //
+            // Download series            
             Console.WriteLine("\nDonwload series");
 
             var imagesPath = "/analysis/images";
@@ -144,15 +142,13 @@ namespace Api.Controllers
                         }
                     }     
 
-                    // Extract series
-                    //
+                    // Extract series                    
                     Console.WriteLine("\nExtract series");
                     var zipFile = ZipFile.OpenRead(seriesFilename);
                     zipFile.ExtractToDirectory(studyFolder);               
                 }    
 
-                // Delete all zip folders
-                //
+                // Delete all zip folders            
                 var zipFiles = Directory.GetFiles(studyFolder, "*.zip");
 
                 foreach(var file in zipFiles) 
@@ -182,59 +178,29 @@ namespace Api.Controllers
                 var analiseResultFolder = Path.Join(analiseDir, "/RESULTADO");
 
                 // Convert mha to dcm
-                var referenceDcmFilename = Directory.GetFiles(Directory.GetDirectories(analiseDir).First()).First();
-
-                Console.WriteLine("\nanaliseResultFolder - "+ analiseResultFolder);
-                Console.WriteLine("referenceDcm - "+ referenceDcmFilename);
+                var referenceDcmFilename = Directory.GetFiles(Directory.GetDirectories(analiseDir).First()).First();                                                                                                                                          
+                ImageConverter.MhaToDcm(analiseResultFolder, referenceDcmFilename);
+                var analiseResultZipFileName = analiseResultFolder + ".zip";                
+                ZipFile.CreateFromDirectory(analiseResultFolder, analiseResultZipFileName);
                                 
-                foreach(var filename in Directory.GetFiles(analiseResultFolder))
-                {
-                    if(!filename.EndsWith(".mha"))
-                        continue;
-                    
-                    Console.WriteLine("\nConverting - "+ filename);
-
-                    var mhaFileStream = System.IO.File.Open(filename, FileMode.Open);
-                    var refDcmFileStream = System.IO.File.Open(referenceDcmFilename, FileMode.Open);
-                    
-                    var mha_url_upload = "https://upload.op-image.com/upload/convert";
-                    Console.WriteLine("\nPOST "+mha_url_upload);
-                    
-                    using(var sender = new HttpClient())
-                    {                    
-                        using (var content = new MultipartFormDataContent())
-                        {
-                            content.Add(new StreamContent(mhaFileStream), "mha_file", Path.GetFileName(filename));
-                            content.Add(new StreamContent(refDcmFileStream), "dicom_reference", Path.GetFileName(referenceDcmFilename));
-
-                            var response = await sender.PostAsync(mha_url_upload, content);
-                            Console.WriteLine(response);
-                        }                        
-                    }                    
-                }                
-                //ImageConverter.MhaToDcm(analiseResultFolder, referenceDcm);
-                //var analiseResultZipFileName = analiseResultFolder + ".zip";
-                //ZipFile.CreateFromDirectory(analiseResultFolder, analiseResultZipFileName);
-                
-                /*
                 // Post analysis
                 Console.WriteLine("\nUpload analysis");
-                Console.WriteLine("\n zip filename"+analiseResultZipFileName);
-                using (var fileStream = System.IO.File.Open(analiseResultZipFileName, FileMode.Open))
-                {
-                    var study_url_upload = orthanc_server_url + "/instances";
-                    Console.WriteLine("POST "+study_url_upload);
-
-                    using(var sender = new HttpClient())
+                Console.WriteLine("\n zip filename"+analiseResultZipFileName);                
+                    using (var fileStream = System.IO.File.Open(analiseResultZipFileName, FileMode.Open))
                     {
-                        sender.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", orthancAuthBase64String);
+                        var series_url_upload = orthanc_server_url + "/instances";
+                        Console.WriteLine("POST "+series_url_upload);
 
-                        HttpContent content = new StreamContent(fileStream);
-                        var response = await sender.PostAsync(study_url_upload, content);
-                        Console.WriteLine(response);
+                        using(var sender = new HttpClient())
+                        {
+                            sender.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", orthancAuthBase64String);
+
+                            HttpContent content = new StreamContent(fileStream);
+                            var response = await sender.PostAsync(series_url_upload, content);
+                            Console.WriteLine(response);
+                        }
                     }
-                }
-                */
+                
                 FileManager.DeleteDirectory(studyFolder);                                        
             }
             
