@@ -14,7 +14,7 @@ COPY ["OS/image_converter.py", "/app"]
 USER root
 RUN ln -sf /app/libvtk*.so* /usr/lib
 COPY --from=build /app/publish .
-RUN pip3 install SimpleITK nii2dcm
+RUN pip3 install SimpleITK pydicom
 EXPOSE 5000
 ENV ASPNETCORE_URLS=http://+:5000
 ENTRYPOINT ["dotnet", "Api.dll"]
