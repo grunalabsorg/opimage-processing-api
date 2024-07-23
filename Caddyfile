@@ -1,16 +1,19 @@
-#localhost {
-api0.op-image.com, api0.oncoviewer.com {
+localhost {
+	#api0.op-image.com, api0.oncoviewer.com {
 	@cors_preflight {
 		method OPTIONS
 	}
 	request_body {
-		max_size 100MB
+		max_size 500MB
 	}
 	handle / {
 		respond "Hello, World!"
 	}
 	handle /analysis/* {
 		# handle_path /api/* {
+		request_body {
+			max_size 500MB
+		}
 		reverse_proxy opimage-processing-api:5000 {
 			header_up Host {host}
 			header_up X-Real-IP {remote}
@@ -26,6 +29,9 @@ api0.op-image.com, api0.oncoviewer.com {
 	}
 	handle /orthanc/* {
 		# handle_path /orthanc/* {
+		request_body {
+			max_size 500MB
+		}
 		@preflight_options {
 			method OPTIONS
 		}
