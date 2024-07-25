@@ -12,6 +12,7 @@ using System.Text.Json;
 namespace Api.Controllers
 {
     [ApiController]
+    [Route("/analysis")]
     public class AnalysisController : ControllerBase
     {
         [DllImport("libProjetoContraste.so", CallingConvention = CallingConvention.Cdecl)]
