@@ -10,9 +10,45 @@ namespace Api.OS
             return Path.GetPathRoot(fileInfo.FullName)!.Replace("\\", "/");
         }
         
-        public static void ExtractToDirectory(ZipArchive zipArchive, string destinationDirName)
+        public static void ExtractToDirectory(string zipFileName, string destinationDirName)
         {
-            zipArchive.ExtractToDirectory(destinationDirName, true);
+            using (ZipArchive archive = ZipFile.OpenRead(zipFileName))
+            {
+                foreach (ZipArchiveEntry entry in archive.Entries)
+                {
+                    string destinationPath = Path.Combine(destinationDirName, entry.FullName);
+
+                    // Check if the file or directory already exists
+                    if (File.Exists(destinationPath) || Directory.Exists(destinationPath))
+                    {
+                        destinationPath = GetUniquePath(destinationPath);
+                    }
+
+                    // Ensure the directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(destinationPath) ?? string.Empty);
+
+                    // Extract the file
+                    entry.ExtractToFile(destinationPath);
+                }
+            }
+        }
+
+        private static string GetUniquePath(string path)
+        {
+            string directory = Path.GetDirectoryName(path) ?? string.Empty;
+            string fileName = Path.GetFileNameWithoutExtension(path);            
+
+            int counter = 1;
+            string uniquePath;
+            
+            do
+            {
+                uniquePath = Path.Combine(directory+$" ({counter})", fileName);
+                counter++;
+            }
+            while (File.Exists(uniquePath) || Directory.Exists(uniquePath));
+
+            return uniquePath;
         }
 
         public static void DeleteDirectory(string target_dir)

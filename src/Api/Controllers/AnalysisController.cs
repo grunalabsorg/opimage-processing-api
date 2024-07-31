@@ -53,7 +53,8 @@ namespace Api.Controllers
             Console.WriteLine("Series " + seriesIds);
 
             // Temp vars
-            var orthanc_server_url = "http://orthanc:8042"; // local orthanc            
+            var orthanc_server_url = "http://orthanc:8042"; // local orthanc  
+            //var orthanc_server_url = "https://api0.oncoviewer.com/orthanc/"; // remote orthanc          
             //var orthanc_server_url = "http://localhost:8000"; // local orthanc            
             //var orthanc_server_url = "https://api.comunicaresolutions.com/orthanc/"; // remote orthanc
             
@@ -144,8 +145,9 @@ namespace Api.Controllers
 
                     // Extract series                    
                     Console.WriteLine("\nExtract series");
-                    var zipFile = ZipFile.OpenRead(seriesFilename);
-                    zipFile.ExtractToDirectory(studyFolder);               
+                    //var zipFile = ZipFile.OpenRead(seriesFilename);
+                    //zipFile.ExtractToDirectory(studyFolder);   
+                    FileManager.ExtractToDirectory(seriesFilename, studyFolder);            
                 }    
 
                 // Delete all zip folders            
