@@ -53,8 +53,8 @@ namespace Api.Controllers
             Console.WriteLine("Series " + seriesIds);
 
             // Temp vars
-            var orthanc_server_url = "http://orthanc:8042"; // local orthanc  
-            //var orthanc_server_url = "https://api.op-image.com/orthanc/"; // remote orthanc                                           
+            //var orthanc_server_url = "http://orthanc:8042"; // local orthanc  
+            var orthanc_server_url = "https://api.op-image.com/orthanc/"; // remote orthanc                                           
             
             var orthancUsername = "test";
             var orthancPassword = "test";
