@@ -50,11 +50,9 @@ namespace Api.Controllers
             var requestid = _sessionData.RequestId;
 
             Console.WriteLine("\nReceived request");
-            Console.WriteLine("Series " + seriesIds);
-
             // Temp vars
             //var orthanc_server_url = "http://orthanc:8042"; // local orthanc  
-            var orthanc_server_url = "https://api.op-image.com/orthanc/"; // remote orthanc                                           
+            var orthanc_server_url = "https://api.oncoviewer.com/orthanc/"; // remote orthanc                                           
             
             var orthancUsername = "test";
             var orthancPassword = "test";
@@ -75,8 +73,9 @@ namespace Api.Controllers
 
                 foreach(var seriesId in seriesIds)
                 {
-                    var response = await client.GetAsync(orthanc_server_url + "/series/" + seriesId);                    
-                    var seriesInfo = JsonSerializer.Deserialize<SeriesInfoRoot>(await response.Content.ReadAsStringAsync());
+                    var response = await client.GetAsync(orthanc_server_url + "/series/" + seriesId);       
+                    Console.WriteLine("request series info \n\n"+response);             
+                    SeriesInfoRoot seriesInfo = JsonSerializer.Deserialize<SeriesInfoRoot>(await response.Content.ReadAsStringAsync());
                     
                     if(referenceSeriesInstancesCount is null && referenceParentStudyId is null)
                     {
@@ -186,20 +185,21 @@ namespace Api.Controllers
                 // Post analysis
                 Console.WriteLine("\nUpload analysis");
                 Console.WriteLine("\n zip filename"+analiseResultZipFileName);                
-                    using (var fileStream = System.IO.File.Open(analiseResultZipFileName, FileMode.Open))
+                using (var fileStream = System.IO.File.Open(analiseResultZipFileName, FileMode.Open))
+                {
+                    var series_url_upload = orthanc_server_url + "/instances";
+                    Console.WriteLine("POST "+series_url_upload);
+
+                    using(var sender = new HttpClient())
                     {
-                        var series_url_upload = orthanc_server_url + "/instances";
-                        Console.WriteLine("POST "+series_url_upload);
+                        sender.Timeout = TimeSpan.FromMinutes(10);
+                        sender.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", orthancAuthBase64String);
 
-                        using(var sender = new HttpClient())
-                        {
-                            sender.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", orthancAuthBase64String);
-
-                            HttpContent content = new StreamContent(fileStream);
-                            var response = await sender.PostAsync(series_url_upload, content);
-                            Console.WriteLine(response);
-                        }
+                        HttpContent content = new StreamContent(fileStream);
+                        var response = await sender.PostAsync(series_url_upload, content);
+                        Console.WriteLine(response);
                     }
+                }
                 
                 FileManager.DeleteDirectory(studyFolder);                                        
             }
