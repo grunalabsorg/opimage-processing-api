@@ -21,4 +21,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.Run();
